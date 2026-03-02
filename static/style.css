@@ -1,0 +1,2384 @@
+/* === BASE & TYPOGRAPHIE === */
+body {
+    background: #121212;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* === HEADER RESPONSIVE === */
+.header-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 3000;
+    background: #000;
+    border-bottom: 1px solid #282828;
+}
+
+.jukebox-header {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 25px 15px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    /* Important pour que le fond ne dépasse pas */
+    background-color: #000;
+    /* Couleur de secours */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: background-image 0.5s ease-in-out;
+    /* Transition douce */
+}
+
+/* Optionnel : Ajoute un voile noir par-dessus l'image pour que les boutons blancs ressortent mieux */
+.jukebox-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    /* Assombrit la photo à 40% */
+    z-index: 0;
+}
+
+/* On force tous les éléments du header à passer devant le fond */
+.jukebox-header>* {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Chaque zone prend environ 22–24% sur grand écran */
+/* On réduit un peu la largeur minimale des autres zones pour laisser la place au milieu */
+.header-controls,
+.header-playlist,
+.header-progress,
+.header-right {
+    flex: 0 1 auto;
+    /* Ces zones ne grandissent pas de force */
+    min-width: 100px;
+}
+
+.header-left {
+    flex: 1 1 400px;
+    /* Base raisonnable */
+    max-width: 600px;
+    /* Large mais pas extrême */
+}
+
+.header-left input {
+    width: 100%;
+    height: 32px;
+    font-size: 15px;
+    padding: 0 14px;
+    border-radius: 20px;
+}
+
+
+
+
+/* === ZONE DE RECHERCHE === */
+/* Le conteneur qui aligne la barre et l'icône dossier */
+.header-search-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Espace entre la barre et l'icône dossier */
+    width: 100%;
+}
+
+/* On s'assure que la barre de recherche prend tout l'espace disponible */
+.search-container {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* === 1. GESTION DES MODES ACTIFS (Bouton allumé) === */
+/* On cible les boutons de recherche ET le bouton dossier via son ID */
+.search-icon-btn.active,
+#folderIconBtn.active {
+    background-color: rgba(29, 185, 84, 0.2);
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(29, 185, 84, 0.5);
+    transform: scale(1.1);
+    /* Légèrement agrandi quand actif */
+    opacity: 1 !important;
+    /* Force l'opacité au maximum */
+    filter: drop-shadow(0 0 5px #1db954) !important;
+    /* L'éclat néon vert */
+    transition: 0.2s ease;
+}
+
+/* === 2. STYLE DE LA BARRE DE RECHERCHE === */
+.header-left input {
+    width: 100%;
+    /* On passe de 105px à 130px de padding à droite pour laisser respirer les 4 icônes */
+    padding: 10px 135px 10px 15px;
+    border-radius: 20px;
+    border: none;
+    background: #242424;
+    color: white;
+    outline: none;
+    font-size: 0.95rem;
+    /* Optionnel : un poil plus petit pour voir plus de texte */
+}
+
+/* Style de base pour les 4 boutons */
+.nav-mode-btn {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+/* État ACTIF (Le bouton "coché") */
+.nav-mode-btn.active {
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 5px #1db954) !important;
+    background-color: rgba(29, 185, 84, 0.2);
+    border-radius: 50%;
+    transform: scale(1.1);
+}
+
+/* === 3. GROUPE D'ICÔNES (Alignement) === */
+.search-icons-group {
+    position: absolute;
+    right: 15px;
+    /* On décolle un tout petit peu plus du bord droit de l'input */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Un peu plus d'espace entre les icônes pour le confort tactile */
+    height: 100%;
+}
+
+/* === 4. STYLE DE BASE DE TOUTES LES ICÔNES === */
+/* On inclut le dossier dans les réglages de base pour qu'il soit bien aligné */
+.search-icon-btn,
+#folderIconBtn {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    object-fit: contain;
+    display: block;
+}
+
+/* Spécificité pour le dossier s'il doit être un poil plus grand */
+#folderIconBtn {
+    width: 22px;
+}
+
+/* === 5. EFFETS DE SURVOL (HOVER) === */
+.search-icon-btn:hover,
+#folderIconBtn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Si tu veux que le dossier soit un chouïa plus gros ou différent, 
+   on utilise son ID sans casser l'alignement du groupe */
+#folderIconBtn {
+    width: 22px;
+    /* Légèrement plus imposant car c'est un mode spécial */
+}
+
+/* Bouton x : efface la recherche*/
+.clear-btn {
+    position: absolute;
+    /* On ajuste pour que ce soit AVANT le groupe d'icônes */
+    right: 145px;
+    top: 43%;
+    transform: translateY(-50%);
+    /* Centre la croix verticalement */
+    color: #b3b3b3;
+    font-size: 24px;
+    cursor: pointer;
+    display: none;
+    /* Géré par le JS */
+    z-index: 10;
+    line-height: 1;
+}
+
+.clear-btn:hover {
+    color: #1db954;
+}
+
+/* L'input doit laisser la place à droite pour 4 icônes + la croix */
+.header-left input {
+    padding-right: 170px !important;
+}
+
+
+
+
+/* AFFICAHGE DES FOLDER et FICHIER MP3 DANS LE BODY */
+#main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.folder-item,
+.file-item {
+    background: #282828;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.folder-item:hover {
+    background: #333;
+    border-color: #1db954;
+}
+
+/* Style des lignes de l'explorateur */
+.folder-card,
+.file-card {
+    display: flex;
+    /* Aligne les enfants sur une ligne */
+    align-items: center;
+    /* Centre verticalement l'icône et le texte */
+    gap: 15px;
+    /* Espace entre l'icône et le nom */
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    /* FORCE le curseur "main" */
+    transition: background 0.2s;
+    user-select: none;
+    /* Empêche la sélection de texte accidentelle */
+}
+
+.folder-card:hover,
+.file-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* On ajuste la taille des icônes pour qu'elles soient discrètes mais claires */
+.folder-icon {
+    font-size: 1.4rem;
+    /* Taille réduite pour tenir sur une ligne */
+    display: flex;
+    align-items: center;
+}
+
+.folder-name {
+    font-size: 1rem;
+    color: #e0e0e0;
+    white-space: nowrap;
+    /* Empêche le nom de revenir à la ligne */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Coupe avec "..." si le nom est trop long */
+    cursor: pointer;
+    /* Assure que le curseur main est aussi sur le texte */
+}
+
+
+/* CHEMIN DE L'EXPLORATEUR FIXE */
+.folder-nav-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    background: rgba(18, 18, 18, 0.8) !important;
+    /* Un peu transparent pour l'effet de flou */
+    padding: 10px 18px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 15px;
+
+    /* LE FIX CORRIGÉ */
+    position: sticky !important;
+    top: 167px !important;
+    /* LE "px" EST INDISPENSABLE ICI */
+    z-index: 2999 !important;
+    backdrop-filter: blur(10px);
+}
+
+/* FIX du cover en mode FOLDER */
+.album-banner-container {
+    position: sticky !important;
+    top: 220px !important;
+    /* On la colle juste sous la nav-bar qui fait environ 50px */
+    z-index: 2999 !important;
+    background: #121212 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-button-mini {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.back-button-mini:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.current-path-display {
+    /* On utilise la police par défaut du site pour plus d'harmonie */
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #ffffff;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* Optionnel : un léger reflet pour donner du relief */
+    text-shadow: 0 0 10px rgba(30, 215, 96, 0.2);
+}
+
+/* Le bouton info et tag */
+.info-folder-btn,
+.tag-icon-btn {
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.info-folder-btn:hover,
+.tag-icon-btn:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+
+.tag-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* === ZONE CENTRALE : LECTEUR === */
+.player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0px;
+}
+
+.player-controls button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-controls .playlist-btn {
+    all: unset;
+    background: #1db954;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-controls .playlist-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 5px rgba(29, 185, 84, 0.5);
+}
+
+
+/* === BOUTON CENTRAL PLAY/PAUSE === */
+#pauseBtn {
+    width: 50px;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pauseBtn.playing {
+    background-image: url('/static/icons/pause.png') !important;
+    background-size: 75% !important;
+}
+
+#pauseBtn.paused {
+    background-image: url('/static/icons/play.png') !important;
+
+}
+
+#pauseBtn:active {
+    transform: scale(0.9);
+}
+
+/* === BOUTONS REWIND & FORWARD === */
+#rewindBtn,
+#forwardBtn {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#rewindBtn {
+    background-image: url('/static/icons/rewind.png');
+}
+
+#forwardBtn {
+    background-image: url('/static/icons/forward.png');
+}
+
+#rewindBtn:active,
+#forwardBtn:active {
+    transform: scale(0.9);
+    filter: brightness(1.2);
+}
+
+/* === BOUTONS DU LECTEUR (HEADER) === */
+#prevBtn,
+#nextBtn {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#prevBtn {
+    background-image: url('/static/icons/previous.png');
+    margin-right: 20px;
+}
+
+#nextBtn {
+    background-image: url('/static/icons/next.png');
+    margin-left: 20px;
+}
+
+#prevBtn:active,
+#nextBtn:active {
+    transform: scale(0.9);
+    filter: brightness(1.2);
+}
+
+
+/* === BARRE DE PROGRESSION === */
+.progress-zone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.progress-zone span {
+    font-size: 0.75rem;
+    color: #b3b3b3;
+    min-width: 35px;
+}
+
+#progressSlider {
+    flex-grow: 1;
+    height: 4px;
+    accent-color: #1db954;
+    cursor: pointer;
+}
+
+/* === ZONE VOLUME === */
+.header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#volumeSlider {
+    width: 100px;
+    accent-color: #1db954;
+    cursor: pointer;
+}
+
+/* === LISTE DES MORCEAUX === */
+#songsList {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.song-card {
+    background: #181818;
+    padding: 12px 20px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* La classe maîtresse pour tous tes boutons de lecture */
+.play-btn {
+    background-color: #1db954 !important;
+    /* On force le vert */
+    color: #000000 !important;
+    /* On force le triangle NOIR */
+    border: none !important;
+    /* On enlève la bordure grise/blanche */
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    padding-left: 2px;
+    /* Pour le centrage optique du triangle */
+    transition: transform 0.2s;
+}
+
+.play-btn:hover {
+    background-color: #1ed760 !important;
+    transform: scale(1.1);
+}
+
+.play-btn span {
+    display: block;
+    line-height: 0;
+}
+
+/* Style pour l'artiste et l'album */
+.song-subtext {
+    font-size: 0.85rem;
+    color: #a7a7a7;
+    /* Un gris un peu plus doux */
+    margin-top: 5px;
+    letter-spacing: 0.3px;
+    /* Un peu plus d'espace entre les lettres pour la clarté */
+}
+
+/* le symbole '>' ressort un peu moins que le texte */
+.song-subtext span {
+    vertical-align: middle;
+}
+
+/* Optionnel : mettre l'album en blanc très léger pour le différencier de l'artiste */
+.song-album {
+    color: #efefef;
+    opacity: 0.6;
+}
+
+/* === REGLAGE AMBIANCE INTERSTICES (Correction de ta ligne coupée à la fin) === */
+body {
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-color: #000;
+    transition: background-image 0.8s ease-in-out;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px) brightness(0.3);
+    z-index: -1;
+}
+
+/* === ITEM du volet PLAYLIST === */
+/**
+ * SECTION : PLAYLIST (PANNEAU LATÉRAL)
+ * Regroupement propre pour éviter les conflits
+ */
+
+/* 1. La ligne de la playlist (Le conteneur) */
+.playlist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* 2. Effet au survol */
+.playlist-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* 3. Style du texte (Titre - Artiste) */
+.playlist-text {
+    flex-grow: 1;
+    cursor: pointer;
+    color: #eee;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+
+/* --- 4 & 5 HIGHLIGHT GLOBAL AVEC ANIMATION --- */
+
+/* L'animation de pulsation du fond */
+@keyframes pulse-green {
+    0% {
+        background: rgba(29, 185, 84, 0.15);
+    }
+
+    50% {
+        background: rgba(29, 185, 84, 0.30);
+    }
+
+    100% {
+        background: rgba(29, 185, 84, 0.15);
+    }
+}
+
+/* Le conteneur (fond, bordure et animation) */
+.playlist-item.playing-now,
+.song-item.playing-now,
+.album-track-item.playing-now,
+.file-card.playing-now {
+    animation: pulse-green 4s infinite ease-in-out;
+    border-left: 4px solid #1db954 !important;
+    transition: all 0.3s ease;
+    /* Pour la barre de progression en surbrillance */
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* La barre de progression (overlay plus clair) */
+.playlist-item.playing-now::before,
+.song-item.playing-now::before,
+.album-track-item.playing-now::before,
+.file-card.playing-now::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--progress, 0%);
+    background: rgba(255, 255, 255, 0.15);
+    /* Légèrement plus clair que le vert pulse */
+    z-index: -1;
+    /* Derrière le texte mais devant le fond */
+    pointer-events: none;
+    transition: width 0.5s linear;
+}
+
+/* Couleurs de texte et effet de lueur (Glow) */
+.playlist-item.playing-now .playlist-text,
+.song-item.playing-now .song-title,
+.album-track-item.playing-now .track-title-text,
+.file-card.playing-now .folder-name {
+    color: #1db954 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(29, 185, 84, 0.3);
+    /* Petite lueur discrète */
+}
+
+/* Slot de cover, numéros et icônes qui s'allument */
+.playlist-item.playing-now .cover-slot,
+.album-track-item.playing-now .track-number,
+.file-card.playing-now .folder-icon {
+    border: 1px solid #1db954 !important;
+    box-sizing: border-box;
+    color: #1db954 !important;
+}
+
+
+/* === FILE-CARD : LAYOUT PC === */
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+}
+
+.file-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
+/* 6. Bouton supprimer (Corbeille) */
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+/* 7. Fermer ou réduire le volet playlist */
+.reduce-playlist-btn {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #888;
+    /* Couleur grise discrète par défaut */
+    padding: 0;
+}
+
+/* Le symbole lui-même */
+.chevron-symbol {
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 4px;
+    /* Petit ajustement pour centrer le › verticalement */
+}
+
+/* --- EFFET AU SURVOL --- */
+.reduce-playlist-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Petit halo gris clair */
+    color: #1db954;
+    /* Le chevron devient vert Spotify */
+    transform: translateX(3px);
+    /* Le bouton bouge légèrement vers la droite (l'effet "pousse") */
+}
+
+/* --- EFFET AU CLIC --- */
+.reduce-playlist-btn:active {
+    transform: scale(0.9) translateX(0px);
+    /* Il s'écrase un peu quand on appuie */
+    background-color: rgba(29, 185, 84, 0.2);
+    /* Halo vert transparent */
+}
+
+.remove-btn:hover {
+    color: #ff4444;
+}
+
+#playlistItems {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+#playlistItems li {
+    padding: 10px;
+    background: #242424;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.play-all-btn {
+    width: 100%;
+    background: #1db954;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+}
+
+.add-to-playlist-btn {
+    background: #1db954;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    color: black;
+}
+
+.song-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Le conteneur */
+.header-playlist {
+    flex: 0 0 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* Le cadre vert (la pilule) identique pour les deux */
+.header-btn-pill {
+    background-color: #1db954;
+    border: none;
+    border-radius: 20px;
+    width: 55px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.header-btn-pill:hover {
+    background-color: #1ed760;
+}
+
+/* L'image des livres (playlists.png) : on la veut grande */
+.btn-icon-large {
+    height: 24px;
+    /* Ajuste ici pour que l'image remplisse bien le cadre */
+    width: auto;
+    object-fit: contain;
+}
+
+/* L'image de la note (playlist.png) : on la veut standard */
+.btn-icon-std {
+    height: 18px;
+    /* Plus petite pour laisser de l'espace vert autour */
+    width: auto;
+    object-fit: contain;
+}
+
+
+/* Style pour le bouton icône seule (sans pourtour) */
+.icon-only-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    transition: transform 0.1s;
+
+    /* AJOUT ICI : Descend le bouton de 3 pixels */
+    transform: translateY(4px);
+}
+
+.icon-only-btn:hover {
+    /* On combine le zoom et le décalage pour ne pas que ça saute au survol */
+    transform: translateY(4px) scale(1.1);
+}
+
+/* Taille de l'image PNG dans le volet de droite */
+.icon-only-btn img {
+    width: 22px;
+    height: auto;
+    display: block;
+}
+
+
+
+
+#playlistItems {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+
+.playlist-text {
+    flex: 1;
+    cursor: pointer;
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* === POUBELLE playlist === */
+.remove-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+}
+
+.remove-btn:hover {
+    color: #ff4444;
+}
+
+
+
+/* === Conteneur & Boutons de base === */
+.playlist-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    /* On espace un peu plus pour laisser respirer le halo */
+    padding: 8px;
+}
+
+.playlist-actions button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    /* Transition douce pour l'allumage */
+}
+
+/* Taille de tes images (PNG de 100px ramenés à la bonne taille) */
+.playlist-actions button img {
+    width: 22px;
+    height: auto;
+}
+
+/* === ÉTAT ÉTEINT (Image 1) === */
+#shufflePlaylistBtn.inactive img {
+    filter: brightness(0.4) grayscale(1);
+    /* Très sombre et gris */
+    opacity: 0.5;
+}
+
+/* === ÉTAT ALLUMÉ (Image 2 - Effet Néon) === */
+#shufflePlaylistBtn.active img {
+    /* 1. On boost la luminosité du blanc */
+    /* 2. On ajoute le halo bleu électrique (drop-shadow) */
+    filter: brightness(1.3) drop-shadow(0 0 8px #00d2ff) drop-shadow(0 0 12px #00d2ff);
+    opacity: 1;
+    transform: scale(1.1);
+    /* On le grossit un tout petit peu pour l'emphase */
+}
+
+/* --- Petit plus pour le bouton Play au survol --- */
+#playPlaylistBtn:hover img {
+    filter: brightness(1.2) drop-shadow(0 0 8px #1db954);
+    /* Halo vert */
+}
+
+/* === GROSSE POUBELLE (Bouton d'action général) === */
+#clearPlaylistBtn {
+    font-size: 17px;
+    /* Diminué pour plus de finesse */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+
+    /* --- LES AJUSTEMENTS DE PRÉCISION --- */
+    margin-left: -7px;
+    /* La décale vers la gauche */
+    margin-right: px;
+    /* Ajoute un petit cran de sécurité à droite du bord */
+    transform: translateY(2px);
+    /* Ajusté pour l'alignement vertical */
+}
+
+#clearPlaylistBtn:hover {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px #ff4444);
+    /* Attention : on garde le translateY dans le transform du hover pour éviter qu'elle saute */
+    transform: translateY(2px) scale(1.1);
+}
+
+
+
+
+
+
+/* Bandeau "Now Playing" */
+.now-playing-bar {
+    width: 100%;
+    display: flex;
+    /* On passe en flex pour aligner image + texte */
+    align-items: center;
+    justify-content: center;
+    /* On garde le tout centré */
+    padding-bottom: 10px;
+    border-bottom: 1px solid #282828;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    gap: 15px;
+    /* Espace entre la pochette et le texte */
+}
+
+/* Le conteneur de l'image */
+.now-playing-cover {
+    flex-shrink: 0;
+    /* Empêche l'image de s'écraser */
+    display: flex;
+    align-items: center;
+}
+
+#current-cover {
+    width: 50px;
+    /* Taille équilibrée pour ton header */
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+/* Petit effet au survol */
+#current-cover:hover {
+    transform: scale(1.1);
+}
+
+#currentTrackInfo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Permet de passer à la ligne sur mobile */
+    justify-content: center;
+}
+
+#trackTitle {
+    color: #1db954;
+    /* Vert pour le titre */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#trackArtist {
+    color: #b3b3b3;
+}
+
+.now-playing-label {
+    color: #555;
+    font-size: 0.7rem;
+    margin-right: 10px;
+    letter-spacing: 1px;
+}
+
+
+
+/* Selectionner le device */
+/* 1. LE CONTENEUR (Le fond noir) */
+.modal {
+    display: none;
+    /* Changé en 'flex' par le JS */
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+
+    /* On force le centrage des deux axes */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 2. LA BOÎTE (Le menu) */
+.modal-content {
+    background-color: #181818;
+    padding: 25px;
+    border: 1px solid #333;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 12px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+
+    /* Sécurité supplémentaire pour le centrage */
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+/* 3. LA LISTE INTERNE (Pour scroller à l'intérieur de la boîte) */
+#deviceList {
+    overflow-y: auto;
+    /* Ajoute un scroll si la liste est longue */
+    margin: 15px 0;
+    padding-right: 5px;
+}
+
+/* 4. LES ITEMS DE LA LISTE (pour que ce soit joli) */
+.device-item {
+    padding: 15px;
+    margin: 10px 0;
+    background: #282828;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.device-item:hover {
+    background: #333;
+    border-color: #1db954;
+}
+
+.device-item.active {
+    background: #1db95422;
+    border-color: #1db954;
+    color: #1db954;
+    font-weight: bold;
+}
+
+body {
+    background-attachment: fixed;
+    /* L'image ne bouge pas quand on scrolle */
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.8s ease-in-out;
+    /* Transition douce */
+    background-color: #000;
+}
+
+/* On ajoute un flou sur tout le fond pour l'effet ambiance */
+/* Note: On utilise un pseudo-élément pour flouter le fond sans flouter le texte */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px) brightness(0.3);
+    /* Ajuste le flou et la luminosité ici */
+    z-index: -1;
+}
+
+/* On s'assure que les cartes de chansons sont bien opaques pour masquer le fond */
+.song-card {
+    background-color: #181818;
+    /* Ton noir habituel */
+    margin-bottom: 8px;
+    /* C'est cet espace qui laissera voir le fond flou */
+    position: relative;
+    z-index: 1;
+}
+
+
+/* === PANNEAU PLAYLIST (SLIDE-IN) === */
+/* Espace et alignement pour les trois icônes à côté du nom (PC) */
+.playlist-header .icon-only-btn {
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+/* Taille uniforme pour les trois images PNG (PC) */
+.playlist-header .icon-only-btn img {
+    width: 20px;
+    height: auto;
+    display: block;
+}
+
+.close-playlist-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.close-playlist-btn:hover {
+    color: white;
+}
+
+.playlist-btn {
+    background: #1db954;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.playlist-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 5px rgba(29, 185, 84, 0.5);
+}
+
+
+
+.playlist-card {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+
+/* === SECTION PC écran full HD 1920x1080 === */
+@media (min-width: 769px) {
+
+    /* On garde UN SEUL bloc ici */
+    .playlist-panel {
+        z-index: 4000;
+        position: fixed;
+        top: 0;
+        right: -600px;
+        /* VALEUR A CHANGER (ex: -800px) */
+        width: 600px;
+        /* VALEUR A CHANGER (ex: 800px)  */
+        height: 100vh;
+        background: #181818;
+        border-left: 1px solid #333;
+        padding: 20px;
+        box-sizing: border-box;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* Zone scrollable interne (On la garde !) */
+    .playlist-scroll-zone {
+        flex: 1;
+        overflow-y: auto;
+        margin-top: 10px;
+        padding-right: 6px;
+        overscroll-behavior: contain;
+    }
+
+    #songList {
+        transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-right: 0;
+        width: auto;
+    }
+
+    .playlist-panel.open {
+        right: 0;
+    }
+
+    /* L'EFFET ACCORDÉON */
+    body.playlist-is-open #songList {
+        margin-right: 600px;
+        /* VALEUR A CHANGER (doit être égale à width) */
+    }
+}
+
+
+
+/* Bouton INFO */
+/* Modal INFO */
+
+.current-path-display {
+    font-size: 0.85rem !important;
+    /* Texte plus petit */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Ajoute "..." si le chemin est trop long */
+    max-width: 40% !important;
+    /* Ne prend pas plus de 40% de la largeur */
+}
+
+.folder-nav-bar {
+    padding: 8px 10px !important;
+    /* Un peu moins de padding pour gagner de la place */
+    justify-content: space-between !important;
+}
+
+
+/* Style de la Popup Info */
+/* --- Conteneur principal --- */
+/* ==========================================================================
+   MODALE INFO - STRUCTURE & CROIX
+   ========================================================================== */
+.info-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+}
+
+.info-modal-content {
+    background: #121212;
+    border: 1px solid #282828;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    min-height: auto;
+    /* On supprime les 380px */
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* On gère les espaces via les marges internes */
+}
+
+/* Croix de Fermeture Blanche au Survol */
+.close-info {
+    position: absolute;
+    right: 18px;
+    top: 12px;
+    font-size: 26px;
+    cursor: pointer;
+    color: #b3b3b3;
+    transition: all 0.2s ease;
+    z-index: 101;
+}
+
+.close-info:hover {
+    color: #ffffff;
+    transform: scale(1.2);
+}
+
+.close-info:active {
+    transform: scale(0.9);
+}
+
+/* ==========================================================================
+   NAVIGATION DU LECTEUR (HEADER) - NE PAS TOUCHER
+   ========================================================================== */
+#prevBtn,
+#nextBtn {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#prevBtn {
+    background-image: url('/static/icons/previous.png');
+    margin-right: 20px;
+}
+
+#nextBtn {
+    background-image: url('/static/icons/next.png');
+    margin-left: 20px;
+}
+
+/* ==========================================================================
+   NAVIGATION DANS LA MODALE INFO (STYLE IMAGE 1)
+   ========================================================================== */
+.info-nav-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent !important;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-left: 20px;
+}
+
+/* On utilise des IDs spécifiques pour la modale */
+#infoPrevBtn,
+#infoNextBtn {
+    width: 24px !important;
+    height: 24px !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    /* On enlève invert(1) qui peut rendre les boutons noirs selon la source */
+    filter: brightness(2);
+    /* Augmente la luminosité pour un blanc pur */
+    transition: all 0.2s ease;
+    opacity: 1;
+    /* On s'assure qu'ils sont bien visibles par défaut */
+}
+
+/* État au survol pour plus de clarté */
+#infoPrevBtn:hover,
+#infoNextBtn:hover {
+    filter: brightness(5);
+    transform: scale(1.1);
+}
+
+/* État Désactivé (celui qui est gris très foncé sur ton image 2) */
+#infoPrevBtn:disabled,
+#infoNextBtn:disabled {
+    opacity: 0.15 !important;
+    /* Très transparent pour montrer l'inactivité */
+    filter: grayscale(1) brightness(0.5) !important;
+    cursor: default;
+    pointer-events: none;
+}
+
+#infoPrevBtn {
+    background-image: url('/static/icons/previous.png');
+}
+
+#infoNextBtn {
+    background-image: url('/static/icons/next.png');
+}
+
+
+#infoPrevBtn:active,
+#infoNextBtn:active {
+    transform: scale(0.9);
+}
+
+/* État Désactivé (Opacity 0.2) */
+#infoPrevBtn:disabled,
+#infoNextBtn:disabled {
+    opacity: 0.2;
+    cursor: default;
+    pointer-events: none;
+    filter: invert(1) brightness(0.3) !important;
+}
+
+/* Loader & Badges */
+.loader {
+    border: 3px solid #333;
+    border-top: 3px solid #1db954;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.info-badge {
+    color: #1db954;
+    text-decoration: none;
+    font-size: 0.8em;
+    border: 1px solid #1db954;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(29, 185, 84, 0.05);
+    transition: 0.2s;
+}
+
+.info-badge:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+
+/* Info Covers MODAL INFO */
+.info-cover-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    cursor: zoom-in;
+}
+
+.info-cover-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    font-size: 9px;
+    padding: 5px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    /* Laisse passer le clic vers l'image */
+    line-height: 1.2;
+}
+
+.info-cover-container:hover .info-cover-overlay {
+    opacity: 1;
+}
+
+/* Ajout du bouton/icone download cover */
+.download-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    /* Fond légèrement transparent */
+    border: none;
+    border-radius: 50%;
+    /* Bouton rond */
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 10px;
+}
+
+.download-icon-btn:hover {
+    background: rgba(29, 185, 84, 0.2);
+    /* Vert Spotify transparent au survol */
+    transform: scale(1.1);
+}
+
+.download-icon-btn img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* COVER en MODE FOLDER */
+.album-banner-hero h1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+
+
+/* Force les 3 icônes (Books, Plus, Save) à la même taille sur mobile */
+.playlist-header button.icon-only-btn img {
+    width: 18px !important;
+    height: auto !important;
+}
+
+/* On remonte le groupe d'icônes pour l'aligner avec "Manon" */
+.playlist-header button.icon-only-btn {
+    transform: translateY(0px) !important;
+    margin-left: 10px !important;
+    /* Un peu plus d'espace pour les gros doigts */
+}
+
+
+.add-all-folder {
+    background-color: #1db954;
+    /* Vert Spotify */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.2s;
+    text-transform: uppercase;
+}
+
+.add-all-folder:hover {
+    background-color: #1ed760;
+    transform: scale(1.05);
+}
+
+.add-all-folder:active {
+    transform: scale(0.95);
+}
+
+/* On ajuste aussi le bouton Tout Lire pour qu'il soit assorti mais plus discret */
+.play-all-folder {
+    background-color: transparent;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+* Ajustement spécifique du bouton réduire sur Mobile */ .reduce-playlist-btn {
+    width: 30px !important;
+    /* On réduit la taille pour mobile */
+    height: 30px !important;
+    background-color: #282828 !important;
+    /* Un gris plus doux que le noir */
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.reduce-playlist-btn .chevron-symbol {
+    font-size: 18px !important;
+    /* Symbole plus petit */
+    color: #1db954 !important;
+    /* On le force en vert pour qu'il soit visible */
+    margin-bottom: 2px !important;
+    /* Ajustement centrage */
+}
+
+/* BOUTON SETTINGs*/
+/* Style par défaut pour PC */
+.admin-gear {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    opacity: 0.3;
+    padding: 10px;
+    /* Zone de clic plus large */
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Effet au survol sur PC */
+.admin-gear:hover {
+    opacity: 1 !important;
+    transform: rotate(45deg);
+}
+
+/* ****************************************  MODAL SETTINGS  **************************************** */
+.close-settings-btn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 35px;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.3s ease;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.close-settings-btn:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+
+/* ****************************************  MODAL SETTINGS  **************************************** */
+
+.settings-card {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 380px;
+    /* Élargie pour plus de confort sur Desktop */
+    padding: 2.2rem;
+    border-radius: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+#settingsCard-bg,
+#fastSettingsCard-bg {
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+#settingsCard-bg {
+    background-image: url('/static/icons/deep.png');
+    background-size: cover;
+    filter: saturate(1.1) contrast(1.1);
+    transform: translate(13px, -60px);
+}
+
+#fastSettingsCard-bg {
+    background-image: url('/static/icons/fast.png');
+    background-size: contain;
+    /* Évite de rogner le coureur */
+    opacity: 0.6;
+    transform: scale(0.95);
+    /* Légère réduction pour l'élégance */
+}
+
+.settingsCard-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.settings-cards-container {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    justify-content: center;
+    max-width: 95%;
+}
+
+
+
+/* L'effet de base du cercle électrique */
+/* Animation de scintillement électrique */
+@keyframes spark {
+    0% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 5px #00f2ff) brightness(1);
+    }
+
+    10% {
+        opacity: 1;
+        filter: drop-shadow(0 0 15px #00f2ff) brightness(1.2);
+    }
+
+    12% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 10px #00f2ff) brightness(1.1);
+    }
+}
+
+#scan-circle {
+    stroke: #00f2ff;
+    stroke-width: 6;
+    stroke-linecap: round;
+    /* La lueur qui ne sera plus coupée */
+    filter: drop-shadow(0 0 12px #0080ff);
+    animation: spark 0.2s infinite alternate;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optionnel : faire briller le pourcentage en rythme */
+#scan-percent {
+    color: #fff;
+    text-shadow: 0 0 10px #fff,
+        0 0 20px #00f2ff;
+    /* Lueur bleue qui rappelle le cercle */
+    font-weight: 90;
+}
+
+@keyframes text-pulse {
+
+    0%,
+    100% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 30px #00f2ff, 0 0 40px #0080ff;
+    }
+}
+
+#scan-eta {
+    color: #fff;
+    text-shadow: 0 0 8px #00f2ff;
+}
+
+@keyframes spark-red {
+    0% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 5px #ff4444) brightness(1);
+    }
+
+    10% {
+        opacity: 1;
+        filter: drop-shadow(0 0 15px #ff4444) brightness(1.2);
+    }
+
+    12% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 10px #ff4444) brightness(1.1);
+    }
+}
+
+#fast-scan-circle {
+    stroke: #ff4444;
+    stroke-width: 6;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 12px #ff0000);
+    animation: spark-red 0.2s infinite alternate;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#fast-scan-percent {
+    color: #fff;
+    text-shadow: 0 0 10px #fff,
+        0 0 20px #ff4444;
+    font-weight: 90;
+}
+
+#fast-scan-eta {
+    color: #fff;
+    text-shadow: 0 0 8px #ff4444;
+}
+
+/* === NOUVEAU BILAN FAST REINDEX === */
+.fast-scan-result {
+    width: 280px;
+    padding: 10px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.5s ease-out;
+
+    /* AJOUTE CETTE LIGNE CI-DESSOUS */
+    margin-top: -5px;
+    /* <--- Joue avec cette valeur */
+}
+
+.result-header {
+    color: #ff4444;
+    font-weight: 900;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.result-main-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.result-main-stats span {
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+.result-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    /* <--- Agrandit la police (0.9rem -> 1.1rem par exemple) */
+    font-weight: bold;
+    /* <--- Passe le texte en gras */
+    color: #00FFFF;
+    opacity: 1;
+    /* <--- Optionnel : passer à 1 pour que le rouge soit bien vif */
+    padding: 6px 0;
+    /* <--- Optionnel : un peu plus d'espace entre les lignes */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item span:last-child {
+    font-family: monospace;
+    font-weight: bold;
+    color: #ff4444;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+
+
+
+
+
+
+/* === SECTION MOBILE : HEADER COMPACT & ÉQUILIBRÉ === */
+@media screen and (max-width: 768px) {
+
+    /* 1. Reset global pour éviter le vide */
+    .jukebox-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 10px !important;
+        min-height: auto !important;
+    }
+
+    /* 2. On resserre toutes les zones */
+    .header-left,
+    .header-controls,
+    .header-playlist,
+    .header-progress,
+    .header-right {
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 2px 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* 3. Conteneur de recherche */
+    .header-search-block {
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* 4. Conteneur interne */
+    .search-container {
+        width: 95% !important;
+        max-width: 100% !important;
+        height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
+
+    /* 5. Input mobile */
+    .header-left input,
+    #searchInput {
+        width: 100% !important;
+        height: 36px !important;
+        padding: 8px 145px 8px 12px !important;
+        font-size: 14px !important;
+        border-radius: 16px !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        box-sizing: border-box !important;
+        border: none !important;
+        color: white !important;
+    }
+
+    /* 6. Croix d’effacement */
+    .clear-btn {
+        right: 125px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 20px !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+
+    /* 7. Icônes de recherche */
+    .search-icons-group {
+        position: absolute !important;
+        right: 8px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        gap: 8px !important;
+        height: 24px !important;
+        align-items: center !important;
+    }
+
+    .search-icons-group img {
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .admin-gear {
+        font-size: 1rem;
+        padding: 5px;
+        opacity: 0.5;
+        /* Un peu plus visible sur mobile car pas de survol possible */
+    }
+
+    .now-playing-bar {
+        padding-right: 10px !important;
+        /* On redonne de la place sur mobile */
+        width: 100% !important;
+    }
+
+
+
+    /* 2. PLAYLIST : ÉTANCHÉITÉ ET SCROLL */
+    .playlist-panel {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: #121212 !important;
+        /* Couleur de fond opaque */
+        z-index: 10000 !important;
+        display: none !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+
+    .playlist-panel.open {
+        display: flex !important;
+    }
+
+    /* Zone de scroll interne */
+    .playlist-scroll-zone {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 5px !important;
+        background: #121212 !important;
+        /* Sécurité visuelle */
+    }
+
+    /* --- AJUSTEMENT UNIQUE : HAUTEUR DU FOOTER --- */
+    .playlist-footer {
+        flex-shrink: 0 !important;
+        height: 15px !important;
+        /* On descend de 60px à 45px pour plus de finesse */
+        background: #181818 !important;
+        border-top: 1px solid #333;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding-bottom: 15px !important;
+        /* Un petit dégagement pour le confort */
+    }
+
+    /* 3. ANTI-DÉRAPAGE (GÉLATINE DU BODY) */
+    html,
+    body {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+    }
+
+    /* Quand la playlist est ouverte, le site derrière devient un bloc fixe */
+    body.playlist-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* 4. TAILLE DES CARACTÈRES */
+    .playlist-item-title {
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
+    }
+
+
+
+    /* 3 === BODY : FICHIERS MP3 (.file-card) === */
+    /* === FILE-CARD : BOUTONS CÔTE À CÔTE ALIGNÉS À DROITE === */
+
+    .file-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        padding: 10px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Zone texte à gauche */
+    .file-info {
+        flex-grow: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        min-width: 0 !important;
+    }
+
+    /* Zone boutons à droite */
+    .file-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        flex-shrink: 0 !important;
+        width: auto !important;
+    }
+
+    /* Boutons */
+    .file-actions button {
+        min-width: 40px !important;
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+        border-radius: 20px !important;
+    }
+
+    /* Texte du fichier */
+    .folder-name {
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+
+
+    /* Réduction du slider volume sur mobile */
+    #plVolumeSlider {
+        width: 60px !important;
+    }
+}
+
+/* === MINI PLAYER CONTROLS (PLAYLIST PANEL) === */
+#plPrevBtn,
+#plNextBtn {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#plPrevBtn {
+    background-image: url('/static/icons/previous.png');
+}
+
+#plNextBtn {
+    background-image: url('/static/icons/next.png');
+}
+
+
+#plRewindBtn,
+#plForwardBtn {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#plRewindBtn {
+    background-image: url('/static/icons/rewind.png');
+}
+
+#plForwardBtn {
+    background-image: url('/static/icons/forward.png');
+}
+
+
+#plPauseBtn {
+    width: 32px;
+    /* Smaller than main player */
+    height: 32px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#plPauseBtn.playing {
+    background-image: url('/static/icons/pause.png') !important;
+    background-size: 75% !important;
+}
+
+#plPauseBtn.paused {
+    background-image: url('/static/icons/play.png') !important;
+}
+
+#volumeSlider,
+#plVolumeSlider,
+#plProgressSlider {
+    accent-color: #1db954;
+    cursor: pointer;
+}
+
+#plVolumeSlider {
+    width: 80px;
+}
+
+/* Lien interactif (album, artiste) */
+.interactive-link {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.interactive-link:hover {
+    color: #fff !important;
+    text-decoration: underline;
+}
+
+/* === SETTINGS MOBILE FIX === */
+@media screen and (max-width: 768px) {
+    .settings-cards-container {
+        flex-direction: column !important;
+        gap: 20px !important;
+        align-items: center !important;
+
+        /* FIX: Hauteur illimitée pour permettre le scroll */
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding-bottom: 80px !important;
+        /* Marge pour atteindre le bas */
+    }
+
+    .settings-card {
+        width: 97% !important;
+        max-width: 380px !important;
+        box-sizing: border-box !important;
+        padding: 20px !important;
+        margin-bottom: 20px !important;
+
+        /* FIX: Empêche l'écrasement des cartes */
+        flex-shrink: 0 !important;
+        height: auto !important;
+        min-height: 400px !important;
+        /* Sécurité visuelle */
+    }
+
+    /* FIX: C'est la modal qui scrolle */
+    #settingsModal {
+        /* display: block !important;  <-- RETIRÉ car ça forçait l'affichage permanent. */
+        padding-top: 60px !important;
+        overflow-y: auto !important;
+        align-items: flex-start !important;
+        /* Important pour le scroll */
+    }
+
+    .close-settings-btn {
+        position: fixed !important;
+        top: 15px !important;
+        right: 15px !important;
+        font-size: 2rem !important;
+        z-index: 10006 !important;
+        /* +1 par rapport au reste */
+        background: rgba(0, 0, 0, 0.5) !important;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

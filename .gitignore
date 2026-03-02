@@ -1,0 +1,36 @@
+# Bases de données
+*.db
+*.sqlite3
+
+# Environnement virtuel Python
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+
+# Fichiers compilés et cache Python
+__pycache__/
+*.pyc
+
+# Dossiers de compilation PyInstaller
+build/
+dist/
+*.spec
+
+# Exécutables (A télécharger séparément sur les PC cibles)
+*.exe
+*.apk
+
+# Fichiers de log ou de status locaux
+*status.json
+mb_debug*.json
+mpv.exe
+sqlite3.exe
+
+# Fichier à conserver pour créer l'APK
+APK/*
+APK2/*
+!APK2/www/
+
+# Dossiers de dépendances ou ressources système
+share/

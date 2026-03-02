@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jukebox</title>
+    <link rel="icon" type="image/png" href="jukebox.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="apkDebugLog"
+        style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: lime; font-family: monospace; font-size: 10px; max-height: 100px; overflow-y: auto; z-index: 9999; pointer-events: none; padding: 5px; display: none;">
+    </div>
+    <!-- SIDEBAR SERVEURS (Full Page Modal) -->
+    <!-- Bouton Burger supprimé -->
+    <div id="serverSidebar" class="sidebar">
+        <button class="close-sidebar-btn" onclick="toggleServerSidebar()">&times;</button>
+
+        <div class="sidebar-content-centered">
+            <h2>Mes Jukebox</h2>
+
+            <div class="server-input-group">
+                <input type="text" id="newServerUrl" placeholder="http://192.168.0.x:8000">
+                <button onclick="addServer()">Ajouter</button>
+            </div>
+
+            <div id="serverListContainer" class="server-list">
+                <!-- Les serveurs seront injectés ici -->
+            </div>
+
+            <div class="sidebar-footer">
+                <span id="appVersion">v1.1.0 (APK)</span>
+                <button onclick="toggleDebugLog()"
+                    style="background: none; border: 1px solid gray; color: gray; font-size: 8px; margin-left: 5px; cursor: pointer;">DEBUG</button>
+            </div>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleServerSidebar()"></div>
+
+    <!-- ÉCRAN D'ACCUEIL / SETUP (APK ONLY) -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-card">
+            <img src="jukebox.png" alt="Jukebox Logo" class="welcome-logo">
+            <h1>Bienvenue sur WinJukebox</h1>
+            <p>Pour commencer, veuillez saisir l'adresse IP ou l'URL de votre serveur Jukebox.</p>
+            <div class="welcome-input-group">
+                <input type="text" id="initialServerUrl" placeholder="Ex: http://192.168.1.50:8000">
+                <button onclick="setupInitialServer()">Se connecter</button>
+            </div>
+            <p class="welcome-hint">Exemple: http://mon-serveur:8000</p>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header-wrapper">
+        <header class="jukebox-header">
+
+
+            <div class="now-playing-bar" style="display: flex; align-items: center; width: 100%; padding: 0 10px;">
+                <div class="now-playing-cover" style="flex-shrink: 0;">
+                    <img id="current-cover" src="default_cover.png" alt="Pochette">
+                </div>
+
+                <div id="currentTrackInfo"
+                    style="flex-grow: 1; margin-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span id="trackTitle" style="font-weight: bold;">---</span>
+                    <span class="separator">—</span>
+                    <span id="trackArtist" class="interactive-link" onclick="openCurrentArtist()"
+                        title="Voir l'artiste">---</span>
+                    <span class="separator">—</span>
+                    <span id="trackAlbum" class="interactive-link" onclick="openCurrentAlbum()" title="Voir l'album"
+                        style="color: #b3b3b3;">---</span>
+                </div>
+
+                <button id="settings-btn" class="admin-gear" onclick="openSettings()" title="Paramètres"
+                    style="margin-left: auto; flex-shrink: 0; background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
+            </div>
+
+            <div class="header-left">
+                <div class="header-search-block">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Rechercher artist..." oninput="doSearch()">
+                        <span id="clearSearch" class="clear-btn" onclick="clearSearchInput()"
+                            title="Vider la recherche">&times;</span>
+                        <div class="search-icons-group">
+                            <img src="icons/title.png" class="nav-mode-btn" data-mode="title"
+                                onclick="switchMode('title')" title="Titre">
+                            <img src="icons/artist.png" class="nav-mode-btn active" data-mode="artist"
+                                onclick="switchMode('artist')" title="Artiste">
+                            <img src="icons/album.png" class="nav-mode-btn" data-mode="album"
+                                onclick="switchMode('album')" title="Album">
+                            <img src="icons/file.png" class="nav-mode-btn" id="folderIconBtn" data-mode="folder"
+                                onclick="switchMode('folder')" title="Explorateur de fichiers">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <div class="player-controls">
+                    <button id="prevBtn" title="Précédent"></button>
+                    <button onclick="seek(-10)" id="rewindBtn" title="Reculer 10s"></button>
+                    <button onclick="togglePause()" id="pauseBtn" title="Lecture/Pause"></button>
+                    <button onclick="seek(10)" id="forwardBtn" title="Avancer 10s"></button>
+                    <button id="nextBtn" title="Suivant"></button>
+                </div>
+            </div>
+
+            <div class="header-playlist">
+                <button id="showLibraryHeaderBtn" class="header-btn-pill" onclick="showLibrary()"
+                    title="Mes Bibliothèques">
+                    <img src="icons/playlists.png" alt="Bibliothèques" class="btn-icon-large">
+                </button>
+                <button id="openPlaylistBtn" class="header-btn-pill" onclick="togglePlaylist()"
+                    title="Voir la liste actuelle">
+                    <img src="icons/playlist.png" alt="Playlist" class="btn-icon-std">
+                </button>
+            </div>
+
+            <div class="header-progress">
+                <div class="progress-zone">
+                    <span id="currentTime">0:00</span>
+                    <input type="range" id="progressSlider" value="0" min="0" max="100">
+                    <span id="totalTime">0:00</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button id="local-audio-btn" onclick="toggleLocalAudio()"
+                    style="background:none; border:none; font-size:1.5rem; cursor:pointer; margin-right:10px; opacity:0.5;"
+                    title="Lecture locale sur cet appareil">📱</button>
+                <span id="headerSpeakerBtn" style="cursor:pointer; font-size:1.5rem;"
+                    title="Changer de sortie audio">🔊</span>
+                <input type="range" id="volumeSlider" min="0" max="100" value="70" oninput="changeVolume(this.value)">
+            </div>
+        </header>
+    </div>
+
+    <div id="deviceModal" class="modal">
+        <div class="modal-content">
+            <h3>Choisir la sortie audio</h3>
+            <div id="deviceList"></div>
+            <button onclick="closeDeviceModal()" class="close-modal-btn">Fermer</button>
+        </div>
+    </div>
+
+
+    <!-- VOLET PLAYLIST-->
+
+    <div id="playlistPanel" class="playlist-panel">
+        <div class="playlist-header"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 10px 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h2 id="current-playlist-name" style="margin: 0; font-size: 1.2rem;">Playlist</h2>
+                <button id="newPlaylistBtn" onclick="createNewPlaylist(event)" title="Nouvelle Playlist"
+                    class="icon-only-btn">
+                    <img src="icons/createplaylist.png" alt="Créer Playlist">
+                </button>
+            </div>
+            <button id="hidePlaylistBtn" class="reduce-playlist-btn" onclick="togglePlaylist()"
+                title="Réduire le volet">
+                <span class="chevron-symbol">></span>
+            </button>
+        </div>
+        <div class="playlist-scroll-zone">
+            <ul id="playlistItems"></ul>
+        </div>
+        <div class="playlist-actions-container"
+            style="display: flex; flex-direction: column; padding: 15px 10px; gap: 15px; border-top: 1px solid #333; background: #000;">
+            <!-- 1. Progress Bar -->
+            <div class="progress-zone"
+                style="width: 100%; max-width: none; justify-content: space-between; padding: 0;">
+                <span id="plCurrentTime" style="font-size: 0.7rem; min-width: 30px;">0:00</span>
+                <input type="range" id="plProgressSlider" value="0" min="0" max="100"
+                    style="flex-grow: 1; margin: 0 8px; height: 3px;">
+                <span id="plTotalTime" style="font-size: 0.7rem; min-width: 30px;">0:00</span>
+            </div>
+
+            <!-- 2. Controls Row -->
+            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+
+                <!-- Volume Controls (Left) -->
+                <div class="volume-controls"
+                    style="display: flex; align-items: center; position: absolute; left: 0; top: 50%; transform: translateY(-50%); gap: 8px;">
+                    <span id="plSpeakerBtn" onclick="toggleMute()" style="cursor:pointer; font-size:1.5rem;"
+                        title="Couper/Activer le son">🔊</span>
+                    <input type="range" id="plVolumeSlider" min="0" max="100" value="70" style="height: 3px;"
+                        oninput="changeVolume(this.value)" onmousedown="isDraggingVolume=true"
+                        onmouseup="isDraggingVolume=false" ontouchstart="isDraggingVolume=true"
+                        ontouchend="isDraggingVolume=false">
+                </div>
+
+                <!-- Playback Buttons -->
+                <div class="player-controls" style="gap: 5px;">
+                    <button id="plPrevBtn" title="Précédent" style="transform: scale(0.9);"></button>
+                    <button onclick="seek(-10)" id="plRewindBtn" title="Reculer 10s"
+                        style="transform: scale(0.9);"></button>
+                    <button onclick="togglePause()" id="plPauseBtn" title="Lecture/Pause"
+                        style="transform: scale(0.9); margin: 0 5px;"></button>
+                    <button onclick="seek(10)" id="plForwardBtn" title="Avancer 10s"
+                        style="transform: scale(0.9);"></button>
+                    <button id="plNextBtn" title="Suivant" style="transform: scale(0.9);"></button>
+                </div>
+
+                <!-- Playlist Actions (Shuffle & Trash) -->
+                <div class="playlist-actions"
+                    style="padding: 0; gap: 10px; position: absolute; right: 0; top: 50%; transform: translateY(-50%); display:flex; align-items:center;">
+
+                    <button id="plLocalAudioBtn" onclick="toggleLocalAudio()"
+                        style="background:none; border:none; font-size:1.5rem; cursor:pointer; opacity:0.5;"
+                        title="Lecture locale sur cet appareil">📱</button>
+
+                    <button id="shufflePlaylistBtn" class="icon-only-btn" title="Lecture aléatoire"><img
+                            src="icons/shuffle.png" alt="Shuffle"></button>
+                    <button id="clearPlaylistBtn" title="Vider la playlist">🗑️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main id="songList">
+        <div style="padding: 20px; text-align: center;">Chargement de la bibliothèque...</div>
+    </main>
+    <!--
+        <footer>
+        <button class="stop-btn" onclick="stopMusic()">ARRÊTER TOUT</button>
+        </footer>
+    -->
+
+
+    <!-- MODAL INFO -->
+
+    <div id="infoModal" class="info-modal" style="display: none;">
+        <div class="info-modal-content">
+            <div class="close-info-container">
+                <span class="close-info" onclick="closeInfoModal()">&times;</span>
+            </div>
+            <h3 style="margin-top:0; color:#1db954;">Analyse de l'album</h3>
+            <div id="infoContent">
+                <p id="infoPath" style="font-size: 0.7em; color: #666; margin-bottom:10px;"></p>
+                <div id="infoStatus">
+                    <div class="loader"></div>
+                    <p style="text-align:center;">Identification acoustique...</p>
+                </div>
+                <div id="infoDetails" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TAG -->
+    <div id="tagModal" class="info-modal" style="display: none;">
+        <div class="info-modal-content" style="max-width: 1100px; width: 98%; max-height: 85vh; overflow-y: auto;">
+            <div class="close-info-container">
+                <span class="close-info"
+                    onclick="document.getElementById('tagModal').style.display='none'">&times;</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin:0; color:#1db954;">Moteur de Taggage</h3>
+                <div style="display: flex; gap: 10px; margin-right: 45px;">
+                    <!-- Zone Discogs -->
+                    <div
+                        style="display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 25px; border: 1px solid #333;">
+                        <span style="font-size: 0.8em; opacity: 0.5;">Discogs</span>
+                        <input type="text" id="discogsIdInput" placeholder="ID (ex: 12345)"
+                            style="background: transparent; border: none; color: white; outline: none; width: 110px; font-size: 0.9em;">
+                    </div>
+                    <!-- Zone MBID -->
+                    <div
+                        style="display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 25px; border: 1px solid #333;">
+                        <span style="font-size: 0.8em; opacity: 0.5;">MBID</span>
+                        <input type="text" id="mbidInput" placeholder="Release or Group UUID"
+                            style="background: transparent; border: none; color: white; outline: none; width: 300px; font-size: 0.9em;">
+                    </div>
+                    <button id="tagSearchBtn" class="btn-action-green"
+                        style="padding: 3px 12px; font-size: 0.8em; border-radius: 15px;">🔍 Recherche</button>
+                    <button id="tagPathBtn" class="btn-action-green" title="Utiliser le chemin (Dossier/Album)"
+                        style="padding: 3px 12px; font-size: 1.1em; border-radius: 15px; background: #333; border: 1px solid #444;">📂</button>
+                </div>
+            </div>
+            <div id="tagStatus" style="padding: 20px; text-align: center;">
+                <div class="loader"></div>
+                <p>Récupération des suggestions...</p>
+            </div>
+            <div id="tagDetails" style="display: none;">
+                <table class="tag-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr
+                            style="border-bottom: 2px solid #333; color: #888; text-transform: uppercase; font-size: 0.8em;">
+                            <th style="width: 60px; text-align: center; padding: 10px;">Match</th>
+                            <th style="text-align: left; padding: 10px;">Fichiers Réels (BDD)</th>
+                            <th style="text-align: left; padding: 10px;">Suggestions (Web / Path)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tagTableBody"></tbody>
+                </table>
+                <div
+                    style="margin-top: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                    <input type="checkbox" id="renameFilesCheckbox" style="transform: scale(1.2); cursor: pointer;">
+                    <label for="renameFilesCheckbox" style="color: #ccc; cursor: pointer; font-size: 0.9em;">Renommer
+                        les fichiers sources (ex: 01 - Titre.mp3)</label>
+                </div>
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px;">
+                    <button onclick="document.getElementById('tagModal').style.display='none'" class="btn-action-red"
+                        style="padding: 10px 20px; border-radius: 20px;">Annuler</button>
+                    <button id="applyTagsBtn" class="btn-action-green"
+                        style="padding: 10px 20px; border-radius: 20px;">Appliquer les Tags</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- MODAL SETTINGS -->
+
+    <div id="settingsModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); z-index: 10000; align-items: center; justify-content: center; font-family: sans-serif;">
+
+        <button onclick="closeSettings()" class="close-settings-btn">✕</button>
+
+        <!-- Conteneur pour aligner les deux cartes -->
+        <div class="settings-cards-container">
+
+            <!-- CARTE 0 : CONFIGURATION (Masqué sur APK) -->
+
+            <!-- CARTE 1 : FULL REINDEX -->
+            <div class="settings-card">
+
+                <!-- Image décorative en fond -->
+                <div id="settingsCard-bg"></div>
+
+                <!-- Contenu dynamique au-dessus -->
+                <div class="settingsCard-content">
+                    <h2
+                        style="font-size: 10px; letter-spacing: 0.5em; color: rgba(255,255,255,1); text-transform: uppercase; margin-bottom: 2.5rem; text-align: center;">
+                        Deep System Scan</h2>
+
+                    <div style="position: relative; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                        <svg width="180" height="180" viewBox="0 0 180 180"
+                            style="transform: rotate(-90deg); overflow: visible !important;">
+                            <circle cx="90" cy="90" r="82" stroke="rgba(255,255,255,0.05)" stroke-width="4"
+                                fill="transparent" />
+                            <circle id="scan-circle" cx="90" cy="90" r="82" fill="transparent" stroke-dasharray="515.2"
+                                stroke-dashoffset="515.2" />
+                        </svg>
+                        <div
+                            style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <span style="font-size: 2.5rem; font-weight: 100; color: white; letter-spacing: -2px;"><span
+                                    id="scan-percent">0</span><span
+                                    style="font-size: 1rem; color: #ffffff; margin-left: 2px;">%</span></span>
+                            <span id="scan-eta"
+                                style="font-size: 0.75rem; font-family: monospace; color: #ffffff; opacity: 0.8; margin-top: 5px;">00:00</span>
+                        </div>
+                    </div>
+
+                    <div id="scan-count"
+                        style="font-size: 11px; font-family: monospace; color: rgba(255,255,255,1); letter-spacing: 0.1em; margin-bottom: 3rem; text-align: center;">
+                        0 / 0</div>
+                    <button id="btn-reindex" onclick="startFullReindex()"
+                        style="width: 100%; padding: 1rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); cursor: pointer; color: white; font-size: 10px; font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase;">
+                        Full Reindex
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARTE 2 : FAST REINDEX (NOUVEAU) -->
+            <div class="settings-card">
+
+                <!-- Image décorative en fond spécifique pour le mode Fast -->
+                <div id="fastSettingsCard-bg"></div>
+
+                <!-- Contenu dynamique au-dessus -->
+                <div class="settingsCard-content">
+                    <h2
+                        style="font-size: 10px; letter-spacing: 0.5em; color: rgba(255,255,255,1); text-transform: uppercase; margin-bottom: 2.5rem; text-align: center;">
+                        Light System Scan</h2>
+
+                    <div style="position: relative; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                        <svg id="fast-scan-svg" width="180" height="180" viewBox="0 0 180 180"
+                            style="transform: rotate(-90deg); overflow: visible !important;">
+                            <circle cx="90" cy="90" r="82" stroke="rgba(255,255,255,0.05)" stroke-width="4"
+                                fill="transparent" />
+                            <circle id="fast-scan-circle" cx="90" cy="90" r="82" fill="transparent"
+                                stroke-dasharray="515.2" stroke-dashoffset="515.2" />
+                        </svg>
+                        <div id="fast-scan-info-container"
+                            style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <span style="font-size: 2.5rem; font-weight: 100; color: white; letter-spacing: -2px;"><span
+                                    id="fast-scan-percent">0</span><span
+                                    style="font-size: 1rem; color: #ffffff; margin-left: 2px;">%</span></span>
+                            <span id="fast-scan-eta"
+                                style="font-size: 0.75rem; font-family: monospace; color: #ffffff; opacity: 0.8; margin-top: 5px;">00:00</span>
+                        </div>
+                    </div>
+
+                    <div id="fast-scan-count"
+                        style="font-size: 11px; font-family: monospace; color: rgba(255,255,255,1); letter-spacing: 0.1em; margin-bottom: 3rem; text-align: center;">
+                        Ready to Update</div>
+
+                    <button id="btn-fast-reindex" onclick="startFastReindex()"
+                        style="width: 100%; padding: 1rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); cursor: pointer; color: white; font-size: 10px; font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase;">
+                        Fast Update
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script src="app.js"></script>
+    <script src="settings.js"></script>
+
+    <!-- FOLDER PICKER MODAL -->
+    <div id="folderPickerModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 11000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div
+            style="background: #1a1a1a; width: 600px; height: 500px; border-radius: 12px; display: flex; flex-direction: column; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: sans-serif;">
+
+            <!-- HEADER -->
+            <div
+                style="padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #222; border-radius: 12px 12px 0 0;">
+                <span
+                    style="font-weight: bold; color: #fff; font-size: 0.9em; letter-spacing: 0.1em; text-transform: uppercase;">Sélecteur
+                    de dossier</span>
+                <button onclick="closeFolderPicker()"
+                    style="background: none; border: none; color: #888; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+
+            <!-- CURRENT PATH -->
+            <div
+                style="padding: 12px 15px; background: #111; color: #ddd; font-family: monospace; font-size: 0.9em; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 10px;">
+                <span style="color: #666;">📂</span>
+                <span id="fpCurrentPath"
+                    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">...</span>
+            </div>
+
+            <!-- LIST -->
+            <div id="fpFolderList"
+                style="flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 2px;">
+                <!-- Folders will be injected here -->
+            </div>
+
+            <!-- FOOTER -->
+            <div
+                style="padding: 15px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #222; border-radius: 0 0 12px 12px;">
+                <button onclick="fpGoUp()" id="btnFpUp"
+                    style="padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #333; color: #ccc; cursor: pointer; font-size: 0.85em;">⬆
+                    Dossier parent</button>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="closeFolderPicker()"
+                        style="padding: 8px 16px; border-radius: 6px; border: 1px solid #444; background: transparent; color: #aaa; cursor: pointer; font-size: 0.85em;">Annuler</button>
+                    <button onclick="selectCurrentFolder()"
+                        style="padding: 8px 16px; border-radius: 6px; border: none; background: #1DB954; color: white; font-weight: bold; cursor: pointer; font-size: 0.85em;">Valider
+                        ce dossier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

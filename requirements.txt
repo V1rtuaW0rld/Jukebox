@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+mutagen
+pillow
+tqdm
+requests
+musicbrainzngs
+python-mpv-jsonipc
+# Optionnel pour la gestion des variables d'environnement
+python-dotenv
